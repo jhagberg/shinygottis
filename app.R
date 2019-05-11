@@ -103,7 +103,8 @@ sidebar<-  dashboardSidebar(
     menuItem("En oreg hona", tabName = "1hona", icon = icon("female")),
     menuItem("Oreg hona och hane", tabName = "hanehona", icon = icon("restroom")))
   ),
-  h5(paste("Databas version",GDBversion))
+  tags$br(),
+  tags$div(style="text-align: center", tags$i(paste("Databasversion",GDBversion)))
 )
 
 regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status = "primary",solidHeader = TRUE,
@@ -492,7 +493,7 @@ server <- function(input, output, session) {
   updateSelectizeInput(session, 'DAM', choices =females , server=TRUE)
   output$keepAlive <- renderText({
     req(input$count)
-    paste("keep alive ", input$count)
+    tags$div(opacity:0, paste("keep alive ", input$count))
   })
   
   observeEvent(input$tabs,
