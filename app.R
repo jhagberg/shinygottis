@@ -14,7 +14,9 @@ library(readxl)
 library(anytime)
 library(shinydashboard)
 
+#Uppdatera namn och datum när en ny lista skapats
 filename<-"kaninlista2019g2"
+GDBversion<-"G20190510"
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
 
@@ -100,7 +102,8 @@ sidebar<-  dashboardSidebar(
     menuSubItem("En oreg hane", tabName = "1hane", icon = icon("male")),
     menuItem("En oreg hona", tabName = "1hona", icon = icon("female")),
     menuItem("Oreg hona och hane", tabName = "hanehona", icon = icon("restroom")))
-  )
+  ),
+  h5(paste("Databas version",GDBversion))
 )
 
 regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status = "primary",solidHeader = TRUE,
