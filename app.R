@@ -99,9 +99,9 @@ sidebar<-  dashboardSidebar(
   sidebarMenu(id = "tabs",
     menuItem("Provparning", tabName = "provparning", icon = icon("dna"),startExpanded = TRUE,
     menuSubItem("Normal", tabName = "provparning", icon = icon("magic")),
-    menuSubItem("En oreg hane", tabName = "1hane", icon = icon("male")),
-    menuItem("En oreg hona", tabName = "1hona", icon = icon("female")),
-    menuItem("Oreg hona och hane", tabName = "hanehona", icon = icon("restroom")))
+    menuSubItem("En oreg hane", tabName = "1hane", icon = icon("mars")),
+    menuItem("En oreg hona", tabName = "1hona", icon = icon("venus")),
+    menuItem("Oreg hona och hane", tabName = "hanehona", icon = icon("venus-mars")))
   ),
   tags$br(),
   tags$div(style="text-align: center", tags$i(paste("Databasversion",GDBversion)))
@@ -110,7 +110,7 @@ sidebar<-  dashboardSidebar(
 regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status = "primary",solidHeader = TRUE,
                    collapsible = TRUE,width = 12,
                    fluidRow(
-                                          div(id="SIREBOX", box(width=6,title = span(tagList("Far",HTML("&nbsp;"),icon("male"))),status = "primary",solidHeader = TRUE,
+                                          div(id="SIREBOX", box(width=6,title = span(tagList("Far",HTML("&nbsp;"),icon("mars"))),status = "primary",solidHeader = TRUE,
                                            collapsible = FALSE, 
                                            selectizeInput('SIRE','', choices = NULL,  options = list(
                                              valueField = 'Indiv',
@@ -122,7 +122,7 @@ regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status 
                      ,div(style="text-align: center;",actionButton("ingenHane", "Inget Resultat! Vill du para en oregisterad Hane?",icon=icon("exclamation-triangle"))))),
                      
                      div(id="DAMBOX",box(width=6,
-                                         title = span(tagList("Mor",HTML("&nbsp;"),icon("female"))),status = "warning",solidHeader = TRUE,
+                                         title = span(tagList("Mor",HTML("&nbsp;"),icon("venus"))),status = "warning",solidHeader = TRUE,
                                          collapsible = FALSE,
                                          selectizeInput('DAM','', choices = NULL,  options = list(
                                            valueField = 'Indiv',
@@ -152,14 +152,14 @@ oregSiretest <-
       fluidRow(
         box(
           title = span(tagList(
-            "Oregistrerad Far", HTML("&nbsp;"), icon("male")
+            "Oregistrerad Far", HTML("&nbsp;"), icon("mars")
           )),
           status = "primary",
           solidHeader = TRUE,
           collapsible = FALSE,
           box(
             width = 6,
-            title = span(tagList("Farfar", HTML("&nbsp;"), icon("male"))),
+            title = span(tagList("Farfar", HTML("&nbsp;"), icon("mars"))),
             status = "primary",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -180,7 +180,7 @@ oregSiretest <-
           ),
           box(
             width = 6,
-            title = span(tagList("Farmor", HTML("&nbsp;"), icon("female"))),
+            title = span(tagList("Farmor", HTML("&nbsp;"), icon("venus"))),
             status = "warning",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -205,7 +205,7 @@ oregSiretest <-
           id = "DAMBOX",
           box(
             width = 6,
-            title = span(tagList("Mor", HTML("&nbsp;"), icon("female"))),
+            title = span(tagList("Mor", HTML("&nbsp;"), icon("venus"))),
             status = "warning",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -249,7 +249,7 @@ oregDamtest <-
       fluidRow(
         box(
           width = 6,
-          title = span(tagList("Far", HTML("&nbsp;"), icon("male"))),
+          title = span(tagList("Far", HTML("&nbsp;"), icon("mars"))),
           status = "primary",
           solidHeader = TRUE,
           collapsible = FALSE,
@@ -269,14 +269,14 @@ oregDamtest <-
           ,div(style="text-align: center;",actionButton("ingen1Hane", "Inget Resultat! Vill du provpara med en oregisterad Hane också?",icon=icon("exclamation-triangle")))),
         box(
           title = span(tagList(
-            "Oregistrerad Mor", HTML("&nbsp;"), icon("female")
+            "Oregistrerad Mor", HTML("&nbsp;"), icon("venus")
           )),
           status = "warning",
           solidHeader = TRUE,
           collapsible = FALSE,
           box(
             width = 6,
-            title = span(tagList("Morfar", HTML("&nbsp;"), icon("male"))),
+            title = span(tagList("Morfar", HTML("&nbsp;"), icon("mars"))),
             status = "primary",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -295,7 +295,7 @@ oregDamtest <-
           ),
           box(
             width = 6,
-            title = span(tagList("Mormor", HTML("&nbsp;"), icon("female"))),
+            title = span(tagList("Mormor", HTML("&nbsp;"), icon("venus"))),
             status = "warning",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -338,14 +338,14 @@ oregSireandDam <-
       fluidRow(
         box(
           title = span(tagList(
-            "Oregistrerad Far", HTML("&nbsp;"), icon("male")
+            "Oregistrerad Far", HTML("&nbsp;"), icon("mars")
           )),
           status = "primary",
           solidHeader = TRUE,
           collapsible = FALSE,
           box(
             width = 6,
-            title = span(tagList("Farfar", HTML("&nbsp;"), icon("male"))),
+            title = span(tagList("Farfar", HTML("&nbsp;"), icon("mars"))),
             status = "primary",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -366,7 +366,7 @@ oregSireandDam <-
           ),
           box(
             width = 6,
-            title = span(tagList("Farmor", HTML("&nbsp;"), icon("female"))),
+            title = span(tagList("Farmor", HTML("&nbsp;"), icon("venus"))),
             status = "warning",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -387,14 +387,14 @@ oregSireandDam <-
         ),
         box(
           title = span(tagList(
-            "Oregistrerad Mor", HTML("&nbsp;"), icon("female")
+            "Oregistrerad Mor", HTML("&nbsp;"), icon("venus")
           )),
           status = "warning",
           solidHeader = TRUE,
           collapsible = FALSE,
           box(
             width = 6,
-            title = span(tagList("Morfar", HTML("&nbsp;"), icon("male"))),
+            title = span(tagList("Morfar", HTML("&nbsp;"), icon("mars"))),
             status = "primary",
             solidHeader = TRUE,
             collapsible = FALSE,
@@ -413,7 +413,7 @@ oregSireandDam <-
           ),
           box(
             width = 6,
-            title = span(tagList("Mormor", HTML("&nbsp;"), icon("female"))),
+            title = span(tagList("Mormor", HTML("&nbsp;"), icon("venus"))),
             status = "warning",
             solidHeader = TRUE,
             collapsible = FALSE,
