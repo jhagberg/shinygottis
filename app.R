@@ -14,7 +14,7 @@ library(readxl)
 library(anytime)
 library(shinydashboard)
 
-filename<-"kaninlista20190329"
+filename<-"kaninlista2019g2"
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
 
@@ -445,8 +445,28 @@ body <-dashboardBody(
     # Boxes need to be put in a row (or column)
   useShinyjs(),
   tags$head(
+    HTML(
+      "
+          <script>
+          var socket_timeout_interval
+          var n = 0
+          $(document).on('shiny:connected', function(event) {
+          socket_timeout_interval = setInterval(function(){
+          Shiny.onInputChange('count', n++)
+          }, 15000)
+          });
+          $(document).on('shiny:disconnected', function(event) {
+          clearInterval(socket_timeout_interval)
+          });
+          </script>
+          "
+    )
+  ),
+  
+  tags$head(
     tags$link(rel="stylesheet", type="text/css", href="https://use.fontawesome.com/releases/v5.7.2/css/all.css", integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr", crossorigin="anonymous")
   ),
+  
   tabItems( 
     regulartest,
     oregSiretest,
@@ -454,7 +474,8 @@ body <-dashboardBody(
     oregSireandDam
 
    
-  )
+  ),
+  textOutput("keepAlive")
       
   )
 
@@ -466,6 +487,10 @@ server <- function(input, output, session) {
   start_time <- Sys.time() 
   updateSelectizeInput(session, 'SIRE', choices =males ,  server=TRUE)
   updateSelectizeInput(session, 'DAM', choices =females , server=TRUE)
+  output$keepAlive <- renderText({
+    req(input$count)
+    paste("keep alive ", input$count)
+  })
   
   observeEvent(input$tabs,
                {
