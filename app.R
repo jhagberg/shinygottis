@@ -479,7 +479,7 @@ body <-dashboardBody(
 
    
   ),
-  textOutput("keepAlive")
+  tags$div(style="opacity:0", textOutput("keepAlive"))
       
   )
 
@@ -493,7 +493,7 @@ server <- function(input, output, session) {
   updateSelectizeInput(session, 'DAM', choices =females , server=TRUE)
   output$keepAlive <- renderText({
     req(input$count)
-    tags$div(opacity:0, paste("keep alive ", input$count))
+    paste("keep alive ", input$count)
   })
   
   observeEvent(input$tabs,
