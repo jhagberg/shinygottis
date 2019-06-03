@@ -137,7 +137,7 @@ regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status 
                    ),
        
       box(title = "Resultat",status = "primary",solidHeader = TRUE,
-      collapsible = TRUE,width = 12,div(id="DEG",textOutput("inavelkoff")),plotOutput("subPlot"))
+      collapsible = TRUE,width = 12,div(id="DEG",uiOutput("reporting"), textOutput("inavelkoff")),plotOutput("subPlot"))
 )
 
 oregSiretest <-
@@ -233,7 +233,7 @@ oregSiretest <-
       solidHeader = TRUE,
       collapsible = TRUE,
       width = 12,
-      div(id = "DEG2", textOutput("inavelkoff2"), plotOutput("subPlot2"))
+      div(id = "DEG2",  textOutput("inavelkoff2"), plotOutput("subPlot2"))
     )
   )
 
@@ -479,7 +479,7 @@ body <-dashboardBody(
 
    
   ),
-  tags$div(style="opacity:0", textOutput("keepAlive"))
+  tags$div(style="opacity:0.5", textOutput("keepAlive"))
       
   )
 
@@ -494,6 +494,14 @@ server <- function(input, output, session) {
   output$keepAlive <- renderText({
     req(input$count)
     paste("keep alive ", input$count)
+  })
+  observe({
+    # Trigger this observer every time an input changes
+    reactiveValuesToList(input)
+    session$doBookmark()
+  })
+  onBookmarked(function(url) {
+    updateQueryString(url)
   })
   
   observeEvent(input$tabs,
@@ -612,24 +620,22 @@ server <- function(input, output, session) {
     
     
   observeEvent(input$SIRE, {
-    
-    output$inavelkoff = renderText(
+   
+    output$reporting = renderUI(
       {validate(
         need(input$SIRE, message = 'Vänligen välj en far'),
         need(input$DAM, 'Vänligen välj en mor')
-      )
-        isolate({sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)}
-        )})
-    
-    output$subPlot = renderPlot({
-      validate(
-        need(input$SIRE, message = FALSE),
-        need(input$DAM, FALSE)
-      )
-      imagOff<-data.frame("999-99999",input$SIRE,input$DAM,NA,NA,NA, paste0(getNamefromID(input$SIRE),getNamefromID(input$DAM)), "FALSE","2018")
+      )imagOff<-data.frame("999-99999",input$SIRE,input$DAM,NA,NA,NA, paste0(getNamefromID(input$SIRE),getNamefromID(input$DAM)), "FALSE","2018")
       tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
-      sub2<<-subPed(tmp,"999-99999",prevGen = 4,succGen = 0)
-      pedplot(sub2,label=c("Indiv", "Name"), cex=0.5)})
+      sub2<<-subPed(tmp,"999-99999",prevGen = 4,succGen = 0) 
+        tagList(
+        downloadButton("report", "Generera rapport"),
+        isolate({sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)},
+        pedplot(sub2,label=c("Indiv", "Name"), cex=0.5)
+        )
+        )})
+      
+      
   })
   
 }
@@ -667,6 +673,6 @@ getNamefromID <- function(GID){
   Pedi[which(Pedi$Indiv == GID),"Name"]
 }
 
-
+enableBookmarking(store = "url")
 # Run the application 
 shinyApp(ui = ui, server = server)
