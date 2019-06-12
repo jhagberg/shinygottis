@@ -13,6 +13,10 @@ library(optiSel)
 library(readxl)
 library(anytime)
 library(shinydashboard)
+require(data.table)
+require(visNetwork)
+suppressPackageStartupMessages(is_installed <- require(visPedigree))
+
 
 #Uppdatera namn och datum när en ny lista skapats
 filename<-"kaninlista2019g2"
@@ -137,7 +141,7 @@ regulartest <-tabItem(tabName = "provparning", box(title = "Provparning",status 
                    ),
        
       box(title = "Resultat",status = "primary",solidHeader = TRUE,
-      collapsible = TRUE,width = 12,div(id="DEG",uiOutput("reporting"), textOutput("inavelkoff")),plotOutput("subPlot"))
+      collapsible = TRUE,width = 12,div(id="DEG",uiOutput("reporting")))
 )
 
 oregSiretest <-
@@ -478,8 +482,8 @@ body <-dashboardBody(
     oregSireandDam
 
    
-  ),
-  tags$div(style="opacity:0.5", textOutput("keepAlive"))
+  )
+  #,tags$div(style="opacity:0.5", textOutput("keepAlive"))
       
   )
 
@@ -538,6 +542,35 @@ server <- function(input, output, session) {
   shinyjs::hide("ingenHona")
   shinyjs::hide("ingen1Hane")
   shinyjs::hide("ingen1Hona")
+  
+  output$report <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = function(){
+      paste("Provparning-",input$SIRE,"_",input$DAM,"-",format(Sys.Date(), "%Y"), ".pdf", sep="")
+    },
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      file.copy("report.Rmd", tempReport, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+      params <- list(SIRE = input$SIRE,
+                     DAM= input$DAM,
+                    SIRENAME = getNamefromID(input$SIRE),
+                    DAMNAME = getNamefromID(input$DAM),
+                    sub2=sub2,
+                    inavel= pKin[input$SIRE,input$DAM])
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )})
+  
   observeEvent(input$ingenHane, {
     #updateSelectizeInput(session, 'DAM1hane', choices =females, selected=input$DAM, server=TRUE)
     updateTabItems(session, "tabs", "1hane")
@@ -625,14 +658,35 @@ server <- function(input, output, session) {
       {validate(
         need(input$SIRE, message = 'Vänligen välj en far'),
         need(input$DAM, 'Vänligen välj en mor')
-      )imagOff<-data.frame("999-99999",input$SIRE,input$DAM,NA,NA,NA, paste0(getNamefromID(input$SIRE),getNamefromID(input$DAM)), "FALSE","2018")
+      )
+      imagOff<-data.frame("999-99999",input$SIRE,input$DAM,NA,NA,NA, paste0(getNamefromID(input$SIRE),getNamefromID(input$DAM)), "FALSE","2018")
       tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
-      sub2<<-subPed(tmp,"999-99999",prevGen = 4,succGen = 0) 
+      sub2<<-subPed(tmp,"999-99999",prevGen = 5,succGen = 0) 
+      node_1 <-data.table(id=sub2$Indiv,label=paste0(sub2$Name,"\n",sub2$Indiv,"\n",sub2$Född),sex=sub2$Sex)
+      edge_1_sire <- sub2[,c("Indiv","Sire")]
+      edge_1_dam <- sub2[,c("Indiv","Dam")]
+      setnames(edge_1_sire,c("Indiv","Sire"),c("from","to"))
+      setnames(edge_1_dam,c("Indiv","Dam"),c("from","to"))
+      edge_1 <- rbind(edge_1_sire,edge_1_dam)
+      #edge_1[to==0,to:=NA]
+      node_1[sex=="male",widthConstraint:=55]
+      node_1[sex=="male",color:="#119ecc"]
+      node_1[sex=="female",color:="#f4b131"]
+      node_1[sex=="female",widthConstraint:=55]
+      node_1[sex=="male",heightConstraint:=55]
+      node_1[sex=="male",shape:="box"]
+      node_1[sex=="female",shape:="circle"]
+      output$subPlot = renderVisNetwork({
+        #plotOutput(pedplot(sub2,label=c("Indiv", "Name"), cex=0.5,pconnect=100, width = 20))
+        
+        graf<-visNetwork(node_1,edge_1) %>%visEdges(arrows = "to") %>% visHierarchicalLayout(direction = "DU",parentCentralization=FALSE,sortMethod = "directed")
+        #visOptions(graf,manipulation = TRUE)
+        })
         tagList(
-        downloadButton("report", "Generera rapport"),
-        isolate({sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)},
-        pedplot(sub2,label=c("Indiv", "Name"), cex=0.5)
-        )
+        
+        isolate({sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)}),
+        visNetworkOutput("subPlot",height = "600",width="100%"),
+        downloadButton("report", "Generera PDF")
         )})
       
       
@@ -673,6 +727,6 @@ getNamefromID <- function(GID){
   Pedi[which(Pedi$Indiv == GID),"Name"]
 }
 
-enableBookmarking(store = "url")
+#enableBookmarking(store = "url")
 # Run the application 
 shinyApp(ui = ui, server = server)
