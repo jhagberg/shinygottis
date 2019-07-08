@@ -488,7 +488,8 @@ body <-dashboardBody(
 
 
 ui <- dashboardPage(header, sidebar, body)
-
+SIRE1name<-"FISTEL"
+DAM1name<-"DEG"
 
 server <- function(input, output, session) {
   start_time <- Sys.time() 
@@ -542,33 +543,7 @@ server <- function(input, output, session) {
   shinyjs::hide("ingen1Hane")
   shinyjs::hide("ingen1Hona")
   
-  output$report <- downloadHandler(
-    # For PDF output, change this to "report.pdf"
-    filename = function(){
-      paste("Provparning-",input$SIRE,"_",input$DAM,"-",format(Sys.Date(), "%Y"), ".pdf", sep="")
-    },
-    content = function(file) {
-      # Copy the report file to a temporary directory before processing it, in
-      # case we don't have write permissions to the current working dir (which
-      # can happen when deployed).
-      tempReport <- file.path(tempdir(), "report.Rmd")
-      file.copy("report.Rmd", tempReport, overwrite = TRUE)
-      
-      # Set up parameters to pass to Rmd document
-      params <- list(SIRE = input$SIRE,
-                     DAM= input$DAM,
-                    SIRENAME = getNamefromID(input$SIRE),
-                    DAMNAME = getNamefromID(input$DAM),
-                    sub2=sub2,
-                    inavel= pKin[input$SIRE,input$DAM])
-      
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
-      rmarkdown::render(tempReport, output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv())
-      )})
+  
   
   observeEvent(input$ingenHane, {
     #updateSelectizeInput(session, 'DAM1hane', choices =females, selected=input$DAM, server=TRUE)
@@ -598,17 +573,17 @@ server <- function(input, output, session) {
         need(input$DAM1hane, 'Vänligen välj en mor')
       )
         #isolate({testmate2(Pedi,c(input$farfar2,input$farmor2),c(input$morfar2,input$mormor2))}
-        sire=c(input$SIRE1,input$DAM1)
-        dam=input$DAM1hane
-        SIRE1name=paste0(getNamefromID(sire[1]),getNamefromID(sire[2]))
-        DAM1name=getNamefromID(dam)
-        imagOff<-data.frame(c("SIRE1","999-99999"),c(sire[1],"SIRE1"),c(sire[2],dam),NA,NA,NA, c(SIRE1name, paste0(SIRE1name,DAM1name)), Sys.Date(),"FALSE")
+        sire<<-paste0('(',input$SIRE1,'+',input$DAM1,')')
+        dam<<-input$DAM1hane
+        SIRE1name<<-paste0(getNamefromID(input$SIRE1),getNamefromID(input$DAM1))
+        DAM1name<<-getNamefromID(dam)
+        imagOff<-data.frame(c("SIRE1","999-99999"),c(input$SIRE1,"SIRE1"),c(input$DAM1,dam),NA,NA,NA, c(SIRE1name, paste0(SIRE1name,DAM1name)), Sys.Date(),"FALSE")
         tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
         sub2<<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
         sub2<-tidyped(sub2,cand = "999-99999")
-        sub3<-ped2igraph2(sub2,compact=FALSE)
+        sub3<<-ped2igraph2(sub2,compact=FALSE)
         inbreeding<-pedInbreeding(tmp)
-        
+        Inaveltext<<-sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)
         
         output$subPlotSIRE1 = renderVisNetwork({
           graf<-visNetwork(sub3$node, sub3$edge)%>%visEdges(arrows = "to")  %>%visOptions(highlightNearest = TRUE) %>%
@@ -617,9 +592,9 @@ server <- function(input, output, session) {
         })
         tagList(
           
-          isolate({sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)}),
+          isolate({Inaveltext}),
           visNetworkOutput("subPlotSIRE1",height = "600",width="100%"),
-          downloadButton("report", "Generera PDF")
+          downloadButton("report4", "Ladda ned rapport")
         )
         
         
@@ -637,17 +612,17 @@ server <- function(input, output, session) {
         need(input$mormor2, 'Vänligen välj en mormor')
       )
         #isolate({testmate2(Pedi,c(input$farfar2,input$farmor2),c(input$morfar2,input$mormor2))}
-        sire=c(input$farfar2,input$farmor2)
-        dam=c(input$morfar2,input$mormor2)
-        SIRE1name=paste0(getNamefromID(sire[1]),getNamefromID(sire[2]))
-        DAM1name=paste0(getNamefromID(dam[1]),getNamefromID(dam[2]))
-        imagOff<-data.frame(c("SIRE1","DAM1","999-99999"),c(sire[1],dam[1],"SIRE1"),c(sire[2],dam[2],"DAM1"),NA,NA,NA, c(SIRE1name,DAM1name,paste0(SIRE1name,DAM1name)), Sys.Date(),"FALSE")
+        sire<<-paste0('(',input$farfar2,'+',input$farmor2,')')
+        dam<<-paste0('(',input$morfar2,'+',input$mormor2,')')
+        SIRE1name<<-paste0(getNamefromID(input$farfar2),getNamefromID(input$farmor2))
+        DAM1name<<-paste0(getNamefromID(input$morfar2),getNamefromID(input$mormor2))
+        imagOff<-data.frame(c("SIRE1","DAM1","999-99999"),c(input$farfar2,input$morfar2,"SIRE1"),c(input$farmor2,input$mormor2,"DAM1"),NA,NA,NA, c(SIRE1name,DAM1name,paste0(SIRE1name,DAM1name)), Sys.Date(),"FALSE")
         tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
-        sub2<<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
+        sub2<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
         sub2<-tidyped(sub2,cand = "999-99999")
-        sub3<-ped2igraph2(sub2,compact=FALSE)
+        sub3<<-ped2igraph2(sub2,compact=FALSE)
         inbreeding<-pedInbreeding(tmp)
-        
+        Inaveltext<<-sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)
         
         output$subPlothh = renderVisNetwork({
           graf<-visNetwork(sub3$node, sub3$edge)%>%visEdges(arrows = "to")  %>%visOptions(highlightNearest = TRUE) %>%
@@ -656,9 +631,9 @@ server <- function(input, output, session) {
         })
         tagList(
           
-          isolate({sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)}),
+          isolate({Inaveltext}),
           visNetworkOutput("subPlothh",height = "600",width="100%"),
-          downloadButton("report", "Generera PDF")
+          downloadButton("report3", "Ladda ned rapport")
         )
         
         
@@ -675,15 +650,17 @@ server <- function(input, output, session) {
         need(input$mormor, 'Vänligen välj en mormor')
       )
       #Inaveltext<-testmate2(Pedi,input$SIRE1hona,c(input$morfar,input$mormor))
-        sire=input$SIRE1hona
-        dam=c(input$morfar,input$mormor)
-        imagOff<-data.frame(c("DAM1","999-99999"),c(dam[1],sire),c(dam[2],"DAM1"),NA,NA,NA, c(paste0(getNamefromID(dam[1]),getNamefromID(dam[2])),paste0(getNamefromID(sire),getNamefromID(dam[1]),getNamefromID(dam[2]))), Sys.Date(),"FALSE")
+        sire<<-input$SIRE1hona
+        dam<<-paste('(',input$morfar,'+',input$mormor,')')
+        SIRE1name<<-getNamefromID(sire)
+        DAM1name<<-paste0(getNamefromID(input$morfar),getNamefromID(input$mormor))
+        imagOff<-data.frame(c("DAM1","999-99999"),c(input$morfar,sire),c(input$mormor,"DAM1"),NA,NA,NA, c(DAM1name,paste0(SIRE1name,DAM1name)), Sys.Date(),"FALSE")
         tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
-        sub2<<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
+        sub2<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
         sub2<-tidyped(sub2,cand = "999-99999")
-        sub3<-ped2igraph2(sub2,compact=FALSE)
+        sub3<<-ped2igraph2(sub2,compact=FALSE)
         inbreeding<-pedInbreeding(tmp)
-      
+        Inaveltext<<-sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)
       
         output$subPlot1hona = renderVisNetwork({
           graf<-visNetwork(sub3$node, sub3$edge)%>%visEdges(arrows = "to")  %>%visOptions(highlightNearest = TRUE) %>%
@@ -693,9 +670,9 @@ server <- function(input, output, session) {
         
         tagList(
           
-          isolate({sprintf("Inavelskoefficient	: %1.2f%% ", inbreeding[which(inbreeding$Indiv == "999-99999"),2]*100)}),
+          isolate({Inaveltext}),
           visNetworkOutput("subPlot1hona",height = "600",width="100%"),
-          downloadButton("report", "Generera PDF")
+          downloadButton("report2", "Ladda ned rapport")
         )
         
          
@@ -711,27 +688,63 @@ server <- function(input, output, session) {
         need(input$SIRE, message = 'Vänligen välj en far'),
         need(input$DAM, 'Vänligen välj en mor')
       )
-      imagOff<-data.frame("999-99999",input$SIRE,input$DAM,NA,NA,NA, paste0(getNamefromID(input$SIRE),getNamefromID(input$DAM)), Sys.Date(),"FALSE")
+      sire<<-input$SIRE
+      dam<<-input$DAM
+      SIRE1name<<-getNamefromID(sire)
+      DAM1name<<-getNamefromID(dam)
+        
+      imagOff<-data.frame("999-99999",sire,dam,NA,NA,NA, paste0(SIRE1name,DAM1name), Sys.Date(),"FALSE")
       tmp<-data.frame(rbind(as.matrix(Pedi), as.matrix(imagOff)))
       sub2<<-subPed2(tmp,"999-99999",prevGen = 5,succGen = 0) 
       sub2<-tidyped(sub2,cand = "999-99999")
-      sub3<-ped2igraph2(sub2,compact=FALSE)
+      sub3<<-ped2igraph2(sub2,compact=FALSE)
+      Inaveltext<<-sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)
       output$subPlot = renderVisNetwork({
           graf<-visNetwork(sub3$node, sub3$edge)%>%visEdges(arrows = "to")  %>%visOptions(highlightNearest = TRUE) %>%
-          visIgraphLayout(layout="layout_as_tree",type="full") 
+          visIgraphLayout(layout="layout_as_tree",type="full")
         #%>% visHierarchicalLayout(direction = "DU",sortMethod = "directed",levelSeparation = 250, nodeSpacing = 150) 
         })
         tagList(
         
-        isolate({sprintf("Inavelskoefficient	: %1.2f%% ", pKin[input$SIRE,input$DAM]*100)}),
+        isolate({Inaveltext}),
         visNetworkOutput("subPlot",height = "600",width="100%"),
-        downloadButton("report", "Generera PDF")
+        downloadButton("report1", "Ladda ned rapport")
         )
         
         })
       
       
   })
+  lapply(1:4, function(i) {
+  output[[paste0("report", i)]]<- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = function(){
+      paste("Provparning-",paste(sire,collapse="_"),"x",paste(dam,collapse = "_"),"-",format(Sys.Date(), "%Y"), ".html", sep="")
+    },
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      file.copy("report.Rmd", tempReport, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+      
+      params <- list(SIRE = sire,
+                     DAM= dam,
+                     SIRENAME = SIRE1name,
+                     DAMNAME = DAM1name,
+                     node=sub3$node,
+                     edge=sub3$edge,
+                     inavel= Inaveltext)
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )})})
   
 }
 
@@ -945,8 +958,8 @@ ped2igraph2 <- function(ped,compact=TRUE) {
   # Setting virtual size of nodes to 0.0001
   ped_node[id > max_id,":="(shape="none",label="",size=0)]
   # Setting male and female's color
-  ped_node[sex %in% c("male"), ":="(frame.color="#0e8dbb", color = "#119ecc", font.size=5,shape ="box",heightConstraint =30)]
-  ped_node[sex %in% c("female"), ":="(frame.color="#e6a11f", color = "#f4b131",font.size=5, shape ="circle")]
+  ped_node[sex %in% c("male"), ":="(frame.color="#0e8dbb", color = "#119ecc", font.size=10,shape ="box",heightConstraint =35)]
+  ped_node[sex %in% c("female"), ":="(frame.color="#e6a11f", color = "#f4b131",font.size=10, shape ="circle")]
   #ped_node[sex %in% c("male"), ":="(frame.color="#0e8dbb", color = "#119ecc", shape ="box",heightConstraint =55)]
   #ped_node[sex %in% c("female"), ":="(frame.color="#e6a11f", color = "#f4b131", shape ="circle")]
   
