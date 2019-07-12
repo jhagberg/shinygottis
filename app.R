@@ -19,8 +19,8 @@ suppressPackageStartupMessages(is_installed <- require(visPedigree))
 
 
 #Uppdatera namn och datum när en ny lista skapats
-filename<-"kaninlista2019g2"
-GDBversion<-"G20190510"
+filename<-"Mellerudskaninregister_2018_07-09"
+GDBversion<-"M20190623"
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
 
@@ -29,7 +29,7 @@ start_time <- Sys.time()
 if (file.exists(Pedifilename)){
   load(file=Pedifilename)
 }else {
-  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:K"), col_types = c("text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text"))
+  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:L"), col_types = c("skip", "text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text"))
   gottis <- gottis[,c("Nummer","Far nr","Mor nr","Kön","År","Namn","Född")]
   names(gottis)<-c("Indiv","Sire","Dam","Sex","Born","Name","Född")
   #Ta bort tomma rader
@@ -97,7 +97,7 @@ noresultJS1hona <-
 
 
 library(shinydashboard)
-header <- dashboardHeader(title = "Gotlandskaninen")
+header <- dashboardHeader(title = "Mellerudskaninen")
 
 sidebar<-  dashboardSidebar(
   sidebarMenu(id = "tabs",
