@@ -19,8 +19,8 @@ suppressPackageStartupMessages(is_installed <- require(visPedigree))
 
 
 #Uppdatera namn och datum när en ny lista skapats
-filename<-"kaninlista2019g2"
-GDBversion<-"G20190510"
+filename<-"kaninlista2019g_07_15"
+GDBversion<-"G20190715"
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
 
@@ -29,9 +29,9 @@ start_time <- Sys.time()
 if (file.exists(Pedifilename)){
   load(file=Pedifilename)
 }else {
-  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:K"), col_types = c("text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text"))
-  gottis <- gottis[,c("Nummer","Far nr","Mor nr","Kön","År","Namn","Född")]
-  names(gottis)<-c("Indiv","Sire","Dam","Sex","Born","Name","Född")
+  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:V"), col_types = c("text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text","skip","skip","skip","skip","skip","skip","skip","skip","skip","numeric","numeric"))
+  gottis <- gottis[,c("Nummer","Far nr","Mor nr","Kön","År","Namn","Född","2019","2018")]
+  names(gottis)<-c("Indiv","Sire","Dam","Sex","Born","Name","Född","Nitton","Arton")
   #Ta bort tomma rader
   gottis<-gottis[!is.na(gottis$Indiv),]
   #rensa bort kastrat
@@ -49,10 +49,9 @@ if (file.exists(Pedifilename)){
       pKin   <- pedIBD(Pedi)
       save(pKin,file=pKinfilename)
     }
-males<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="male")
-females<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="female")
-
-
+males<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=='male' & (!is.na(Arton) | !is.na(Nitton)))
+females<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="female" & (!is.na(Arton) | !is.na(Nitton)))
+Pedi<-Pedi[,c("Indiv","Sire","Dam","Sex","Born","I","Name","Född","Offspring")]
 end_time <- Sys.time()
 cat(file=stderr(),end_time - start_time)
 
