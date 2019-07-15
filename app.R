@@ -53,7 +53,7 @@ if (file.exists(Pedifilename)){
     }
 males<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=='male' & (!is.na(Arton) | !is.na(Nitton)))
 females<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="female" & (!is.na(Arton) | !is.na(Nitton)))
-
+Pedi<-Pedi[,c("Indiv","Sire","Dam","Sex","Born","I","Name","Född","Offspring")]
 
 end_time <- Sys.time()
 cat(file=stderr(),end_time - start_time)
