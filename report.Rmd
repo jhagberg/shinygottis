@@ -11,7 +11,7 @@ params:
   inavel: NA
   node: NA
   edge: NA
-title: 'Provparning Gotlandskanin'
+title: 'Provparning Mellerudskanin'
 subtitle: "`r paste0(params$SIRE, ' ', params$SIRENAME, ' x ' , params$DAM, ' ', params$DAMNAME)`"
 ---
 ```{css, echo=FALSE}
