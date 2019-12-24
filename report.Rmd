@@ -1,0 +1,48 @@
+---
+#output: pdf_document
+output: html_document
+classoption: landscape
+always_allow_html: yes
+params:
+  SIRE: NA
+  DAM:  NA
+  SIRENAME: NA
+  DAMNAME: NA
+  inavel: NA
+  node: NA
+  edge: NA
+title: 'Provparning Gotlandskanin'
+subtitle: "`r paste0(params$SIRE, ' ', params$SIRENAME, ' x ' , params$DAM, ' ', params$DAMNAME)`"
+---
+```{css, echo=FALSE}
+    body .main-container {
+      
+      max-width: 1600px !important;
+      width: 1600px !important;
+      text-align: center;
+    }
+    body {
+      margin: auto;
+      max-width: 1600px !important;
+    }
+    ```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+```
+
+###`r {params$inavel}`
+
+```{r echo=FALSE, out.width = '100%'}
+require(visNetwork, quietly = TRUE)
+#print(params$node)params$node
+vn<-visNetwork(params$node, params$edge, width="1600px",height = "800px")%>%visEdges(arrows = "to")  %>%visOptions(highlightNearest = TRUE) %>%visIgraphLayout(layout="layout_as_tree",type="full")%>%visExport()%>%visSave(file = "test.html")
+```
+<p align="center">
+```{r, echo=FALSE}
+#```{r, results='asis',echo=FALSE, out.width = '100%',fig.align="center"}
+
+htmltools::includeHTML("test.html")
+
+```
+</p>
