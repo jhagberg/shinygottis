@@ -19,8 +19,9 @@ suppressPackageStartupMessages(is_installed <- require(visPedigree))
 
 
 #Uppdatera namn och datum när en ny lista skapats
-filename<-"kaninlista2019g_07_15"
-GDBversion<-"G20190715"
+filename<-"G20200117"
+GDBversion<-filename
+
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
 
