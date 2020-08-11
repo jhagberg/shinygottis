@@ -19,7 +19,7 @@ suppressPackageStartupMessages(is_installed <- require(visPedigree))
 
 
 #Uppdatera namn och datum när en ny lista skapats
-filename<-"M20191125"
+filename<-"M20200809"
 GDBversion<-filename
 Pedifilename<-paste0('Pedi',filename, '.rdata')
 pKinfilename<-paste0('pKin',filename, '.rdata')
@@ -29,11 +29,11 @@ start_time <- Sys.time()
 if (file.exists(Pedifilename)){
   load(file=Pedifilename)
 }else {
-  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:V"), col_types = c("skip", "text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text","skip","skip","skip","skip","skip","skip","skip","skip","numeric","numeric"))
+  gottis <-read_excel(paste0('./',filename, '.xlsx'), range = cell_cols("A:V"), col_types = c("skip", "text", "skip", "skip","text", "text", "numeric", "date", "skip", "text","skip", "text","skip","skip","skip","skip","skip","skip","skip","numeric","numeric","numeric"))
 
   
-  gottis <- gottis[,c("Nummer","Far nr","Mor nr","Kön","År","Namn","Född","2019","2018")]
-  names(gottis)<-c("Indiv","Sire","Dam","Sex","Born","Name","Född","Nitton","Arton")
+  gottis <- gottis[,c("Nummer","Far nr","Mor nr","Kön","År","Namn","Född","2020","2019","2018")]
+  names(gottis)<-c("Indiv","Sire","Dam","Sex","Born","Name","Född","Tjugo","Nitton","Arton")
   #Ta bort tomma rader
   gottis<-gottis[!is.na(gottis$Indiv),]
   #rensa bort kastrat
@@ -51,8 +51,8 @@ if (file.exists(Pedifilename)){
       pKin   <- pedIBD(Pedi)
       save(pKin,file=pKinfilename)
     }
-males<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=='male' & (!is.na(Arton) | !is.na(Nitton)))
-females<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="female" & (!is.na(Arton) | !is.na(Nitton)))
+males<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=='male' & (!is.na(Arton) | !is.na(Tjugo) | !is.na(Nitton)))
+females<-subset(Pedi[with(Pedi,order(Born,decreasing =TRUE)),],Sex=="female" & (!is.na(Arton)| !is.na(Tjugo) | !is.na(Nitton)))
 Pedi<-Pedi[,c("Indiv","Sire","Dam","Sex","Born","I","Name","Född","Offspring")]
 
 end_time <- Sys.time()
